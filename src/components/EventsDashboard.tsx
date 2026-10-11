@@ -351,7 +351,7 @@ function EventsDashboard() {
             ) : (
               <ActivityTable
                 events={events}
-                selectedEventId={selectedEvent?.id ?? null}
+                selectedEventId={selectedEventId}
                 onSelectEvent={handleSelectEvent}
                 currentPage={currentPage}
                 totalPages={Math.max(1, Math.ceil(totalEvents / pageSize))}
