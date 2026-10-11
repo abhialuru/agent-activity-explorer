@@ -87,7 +87,7 @@ export const ActivityToolbar: React.FC<ActivityToolbarProps> = ({
               onChange={(e) =>
                 onFilterChange({ ...filters, status: e.target.value })
               }
-              className="appearance-none pl-2.5 pr-7 py-1.5 text-xs text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900 cursor-pointer transition-colors font-sans"
+              className="appearance-none pl-2.5 pr-7 py-1.5 text-xs text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-md focus:outline-none cursor-pointer transition-colors font-sans"
             >
               {statuses.map((s) => (
                 <option key={s.value} value={s.value}>

@@ -56,7 +56,7 @@ export const EventsDashboard: React.FC = () => {
 
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const pageSize = 15;
+  const pageSize = 50;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -144,8 +144,21 @@ export const EventsDashboard: React.FC = () => {
     setRefreshKey((value) => value + 1);
   }, []);
 
-  const handleSelectEvent = useCallback((event: ActivityEvent) => {
-    setSelectedEvent((prev) => (prev?.id === event.id ? null : event));
+  const handleSelectEvent = useCallback(async (event: ActivityEvent) => {
+    //    setSelectedEvent((prev) => (prev?.id === event.id ? null : event));
+
+    try {
+      const res = await fetch(`http://localhost:4000/events/${event.id}`);
+      if (!res.ok) {
+        throw new Error("Failed to load the full event");
+      }
+
+      const data = await res.json();
+      console.log("Event details:", data);
+      setSelectedEvent(data);
+    } catch (error) {
+      console.log("Error fetching full event details:", error);
+    }
   }, []);
 
   const handleCloseDrawer = useCallback(() => {

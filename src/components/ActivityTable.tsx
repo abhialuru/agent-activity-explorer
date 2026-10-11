@@ -53,13 +53,6 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-zinc-200/90 bg-zinc-50/75 text-zinc-600 font-mono text-[11px] uppercase tracking-wider select-none sticky top-0 z-10">
-              <th className="py-2.5 pl-6 pr-3 w-10 font-medium">
-                <input
-                  type="checkbox"
-                  aria-label="Select all events"
-                  className="rounded border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer"
-                />
-              </th>
               <th className="py-2.5 px-3 font-medium min-w-[130px]">
                 Timestamp
               </th>
@@ -92,20 +85,6 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
                       : "hover:bg-zinc-50/80 focus:bg-zinc-50"
                   }`}
                 >
-                  {/* Checkbox */}
-                  <td
-                    className="py-2.5 pl-6 pr-3 align-middle"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => onSelectEvent(event)}
-                      aria-label={`Select event ${event.id}`}
-                      className="rounded border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer"
-                    />
-                  </td>
-
                   {/* Timestamp */}
                   <td className="py-2.5 px-3 align-middle font-mono text-zinc-600 tracking-tight whitespace-nowrap">
                     <span title={event.timestamp}>
