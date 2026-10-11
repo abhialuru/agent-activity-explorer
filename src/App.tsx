@@ -1,7 +1,7 @@
-import "./App.css";
+import EventsDashboard from "./components/EventsDashboard";
 
 function App() {
-  return <section>I am Abhi</section>;
+  return <EventsDashboard />;
 }
 
 export default App;
