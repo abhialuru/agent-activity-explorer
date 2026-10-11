@@ -11,33 +11,32 @@ import type {
   EventsResponse,
   ActivityEvent,
   ActivityFilters,
-  ViewState,
 } from "../types/activity";
 
-export const EventsDashboard: React.FC = () => {
+function getParamsFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    query: params.get("q") ?? "",
+    agent: params.get("agent") ?? "",
+    status: params.get("status") ?? "",
+  };
+}
+
+function EventsDashboard() {
   // Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Filter state
-  const [filters, setFilters] = useState<ActivityFilters>({
-    query: "",
-    agent: "",
-    status: "",
-  });
+  const [filters, setFilters] = useState<ActivityFilters>(getParamsFromUrl);
 
   // Selected event for detail drawer
   const [selectedEvent, setSelectedEvent] = useState<ActivityEvent | null>(
     null,
   );
 
-  // Live mode presentation toggle
-  const [liveMode, setLiveMode] = useState(false);
-
-  // View state demo toggle (Ready / Loading / Empty / Error)
-  const [viewState, setViewState] = useState<ViewState>("ready");
-
-  // Refresh spinner state
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(() =>
+    new URLSearchParams(window.location.search).get("eventId"),
+  );
 
   // Filter events client-side based on toolbar controls
 
@@ -57,6 +56,95 @@ export const EventsDashboard: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const pageSize = 50;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (filters.query.trim()) {
+      params.set("q", filters.query.trim());
+    } else {
+      params.delete("q");
+    }
+
+    if (filters.agent) {
+      params.set("agent", filters.agent);
+    } else {
+      params.delete("agent");
+    }
+
+    if (filters.status) {
+      params.set("status", filters.status);
+    } else {
+      params.delete("status");
+    }
+
+    const queryString = params.toString();
+    const newUrl = queryString
+      ? `${window.location.pathname}?${queryString}${window.location.hash}`
+      : `${window.location.pathname}${window.location.hash}`;
+
+    window.history.replaceState({}, "", newUrl);
+  }, [filters.query, filters.agent, filters.status]);
+
+  useEffect(() => {
+    function handlePopState() {
+      const params = new URLSearchParams(window.location.search);
+
+      setFilters({
+        query: params.get("q") ?? "",
+        agent: params.get("agent") ?? "",
+        status: params.get("status") ?? "",
+      });
+
+      setSelectedEventId(params.get("eventId"));
+
+      setCurrentPage(1);
+      setPageCursors([null]);
+    }
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedEventId) {
+      setSelectedEvent(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function fetchEventDetails() {
+      setSelectedEvent(null);
+
+      try {
+        const response = await fetch(
+          `http://localhost:4000/events/${selectedEventId}`,
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to load event details.");
+        }
+
+        const data: ActivityEvent = await response.json();
+        setSelectedEvent(data);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Could not load event details:", error);
+      }
+    }
+
+    fetchEventDetails();
+
+    return () => controller.abort();
+  }, [selectedEventId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -100,7 +188,6 @@ export const EventsDashboard: React.FC = () => {
         setEvents(data.items);
         setNextCursor(data.nextCursor);
         setTotalEvents(data.total);
-        setViewState(data.items.length === 0 ? "empty" : "ready");
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
           return;
@@ -109,7 +196,6 @@ export const EventsDashboard: React.FC = () => {
         setApiError(
           error instanceof Error ? error.message : "Unable to load events.",
         );
-        setViewState("error");
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
@@ -144,46 +230,32 @@ export const EventsDashboard: React.FC = () => {
     setRefreshKey((value) => value + 1);
   }, []);
 
-  const handleSelectEvent = useCallback(async (event: ActivityEvent) => {
-    //    setSelectedEvent((prev) => (prev?.id === event.id ? null : event));
+  const handleSelectEvent = useCallback(
+    (event: ActivityEvent) => {
+      if (event.id === selectedEventId) return;
 
-    try {
-      const res = await fetch(`http://localhost:4000/events/${event.id}`);
-      if (!res.ok) {
-        throw new Error("Failed to load the full event");
-      }
+      const params = new URLSearchParams(window.location.search);
+      params.set("eventId", event.id);
 
-      const data = await res.json();
-      console.log("Event details:", data);
-      setSelectedEvent(data);
-    } catch (error) {
-      console.log("Error fetching full event details:", error);
-    }
-  }, []);
+      const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+
+      window.history.pushState({}, "", newUrl);
+      setSelectedEventId(event.id);
+    },
+    [selectedEventId],
+  );
 
   const handleCloseDrawer = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("eventId");
 
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        const response = await fetch("http://localhost:4000/events");
+    const queryString = params.toString();
+    const newUrl = queryString
+      ? `${window.location.pathname}?${queryString}${window.location.hash}`
+      : `${window.location.pathname}${window.location.hash}`;
 
-        if (!response.ok) {
-          throw new Error("Failed to load agents");
-        }
-
-        const data = await response.json();
-        setEvents(data.items);
-        setNextCursor(data.nextCursor);
-        setTotalEvents(data.total);
-        console.log(data);
-      } catch (error) {
-        console.log("Could not load agents:", error);
-      }
-    }
-    fetchEvents();
+    window.history.replaceState({}, "", newUrl);
+    setSelectedEventId(null);
   }, []);
 
   useEffect(() => {
@@ -299,6 +371,6 @@ export const EventsDashboard: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
 export default EventsDashboard;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IconSearch, IconX, IconChevronDown } from "./icons/Icons";
 import type { ActivityFilters } from "../types/activity";
 
@@ -28,6 +28,28 @@ export const ActivityToolbar: React.FC<ActivityToolbarProps> = ({
     { value: "blocked", label: "Blocked" },
   ];
 
+  const [searchInput, setSearchInput] = useState("");
+
+  useEffect(() => {
+    setSearchInput(filters.query);
+  }, [filters.query]);
+
+  useEffect(() => {
+    if (searchInput === filters.query) return;
+
+    const timeoutId = setTimeout(() => {
+      onFilterChange({ ...filters, query: searchInput });
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    searchInput,
+    filters.query,
+    filters.agent,
+    filters.status,
+    onFilterChange,
+  ]);
+
   return (
     <div className="bg-white border-b border-zinc-200/80 px-6 py-3 space-y-2.5">
       {/* Primary Toolbar Controls */}
@@ -39,14 +61,12 @@ export const ActivityToolbar: React.FC<ActivityToolbarProps> = ({
           </div>
           <input
             type="text"
-            value={filters.query}
-            onChange={(e) =>
-              onFilterChange({ ...filters, query: e.target.value })
-            }
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search events, agents, tools..."
             className="w-full pl-8 pr-8 py-1.5 text-xs text-zinc-900 placeholder:text-zinc-600 bg-zinc-50/60 hover:bg-zinc-50 focus:bg-white border border-zinc-200 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 transition-colors"
           />
-          {filters.query && (
+          {searchInput && (
             <button
               type="button"
               onClick={() => onFilterChange({ ...filters, query: "" })}
