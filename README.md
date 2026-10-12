@@ -1,75 +1,74 @@
-# React + TypeScript + Vite
+# Agent Activity Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript dashboard for exploring agent activity events, with search, filters, cursor-based pagination, and event details.
 
-Currently, two official plugins are available:
+The repository also includes a standalone Performance Clinic with browser performance optimizations.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Event activity table with timestamps, agents, tools, status, and latency
+- Search and filter events by query, agent, and status
+- URL-synchronized filters and linkable event details
+- Cursor-based pagination
+- Loading, empty, and error states
+- Performance improvements to the standalone Performance Clinic
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Native Fetch API
+- HTML, CSS, and JavaScript for the Performance Clinic
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Requirements
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js and npm
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
 
+```bash
+git clone <your-public-repository-url>
+cd agent-activity-explorer
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Run the mock API
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run api
 ```
+
+### Run the dashboard
+
+In a separate terminal, run the dashboard's development command from the `app/` directory.
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+Open the local URL printed by Vite.
+
+### Run the Performance Clinic
+
+From the repository root, run:
+
+```bash
+npm run perf-clinic
+```
+
+Open http://localhost:5174.
+
+## Documentation
+
+- `NOTES.md` — Implementation decisions, tradeoffs, limitations, and AI usage.
+- `PERF.md` — Performance issues identified, fixes applied, and before/after measurements.
+
+## License
+
+Created as part of a frontend engineering take-home assignment.
